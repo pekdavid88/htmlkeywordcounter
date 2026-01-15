@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Kulcsszó Számláló</title>
+    <title>HTML Kulcsszó Számláló + Alt Text</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -26,7 +26,7 @@
         <!-- Header -->
         <div class="p-8 bg-slate-800 text-white">
             <h1 class="text-3xl font-bold">HTML Kulcsszó Ellenőrző</h1>
-            <p class="text-slate-400 mt-2 text-lg">Másold be a forráskódot, és ellenőrizd a kulcsszavak sűrűségét a tiszta szövegben.</p>
+            <p class="text-slate-400 mt-2 text-lg">Ellenőrizd a kulcsszavak sűrűségét a szövegben és az <code class="text-blue-300">alt="..."</code> leírásokban is.</p>
         </div>
 
         <div class="p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -51,7 +51,7 @@
                             </label>
                             <label class="flex items-center space-x-2 cursor-pointer">
                                 <input type="checkbox" id="wholeWord" class="w-4 h-4 text-blue-600 rounded" checked onchange="analyzeContent()">
-                                <span class="text-sm text-gray-600 font-medium">Csak teljes szó (pontos egyezés)</span>
+                                <span class="text-sm text-gray-600 font-medium">Csak teljes szó (pontos)</span>
                             </label>
                         </div>
                     </div>
@@ -69,8 +69,9 @@
                     </div>
 
                     <div class="bg-white p-4 rounded-lg shadow-sm">
-                        <p class="text-sm text-gray-500 uppercase tracking-wider font-bold">Tiszta szöveghossz</p>
+                        <p class="text-sm text-gray-500 uppercase tracking-wider font-bold">Teljes szöveghossz</p>
                         <p id="charCount" class="text-xl font-bold text-slate-700">0 karakter</p>
+                        <p class="text-[10px] text-gray-400 mt-1 uppercase italic">(Szöveg + Alt leírások)</p>
                     </div>
 
                     <div id="densityInfo" class="hidden bg-blue-50 p-4 rounded-lg border border-blue-100">
@@ -98,16 +99,25 @@
                 return;
             }
 
-            // 1. HTML tagek eltávolítása
+            // 1. HTML feldolgozása
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
             
-            const scripts = tempDiv.getElementsByTagName('script');
-            const styles = tempDiv.getElementsByTagName('style');
-            for (let i = scripts.length - 1; i >= 0; i--) scripts[i].remove();
-            for (let i = styles.length - 1; i >= 0; i--) styles[i].remove();
+            // Script és Style elemek törlése
+            const scripts = tempDiv.querySelectorAll('script, style');
+            scripts.forEach(s => s.remove());
 
-            const cleanText = tempDiv.textContent || tempDiv.innerText || "";
+            // --- ÚJ RÉSZ: ALT attribútumok kinyerése ---
+            let altTexts = [];
+            const elementsWithAlt = tempDiv.querySelectorAll('[alt]');
+            elementsWithAlt.forEach(el => {
+                const altValue = el.getAttribute('alt').trim();
+                if (altValue) altTexts.push(altValue);
+            });
+
+            // Tiszta szöveg + Alt szövegek összefűzése egy szóközzel
+            const visibleText = tempDiv.textContent || tempDiv.innerText || "";
+            const cleanText = (visibleText + " " + altTexts.join(" ")).trim();
             const charCount = cleanText.length;
 
             if (!keyword) {
@@ -122,11 +132,6 @@
             
             let regex;
             if (wholeWord) {
-                /**
-                 * Lookbehind és Lookahead használata a szóhatárokhoz.
-                 * Ez biztosítja, hogy a kulcsszó előtt és után ne legyen se betű, se szám (magyar karakterekkel együtt).
-                 * [A-ZÁÉÍÓÖŐÚÜŰa-záéíóöőúüű0-9]
-                 */
                 const boundaryPrefix = '(?<![A-ZÁÉÍÓÖŐÚÜŰa-záéíóöőúüű0-9])';
                 const boundarySuffix = '(?![A-ZÁÉÍÓÖŐÚÜŰa-záéíóöőúüű0-9])';
                 regex = new RegExp(boundaryPrefix + escapedKeyword + boundarySuffix, flags);
