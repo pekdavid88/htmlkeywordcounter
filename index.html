@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Kulcsszó Számláló + Alt Text</title>
+    <title>HTML Kulcsszó Számláló - Tömeges Ellenőrző</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -17,16 +17,20 @@
             font-family: 'Fira Code', 'Courier New', monospace;
             font-size: 0.875rem;
             resize: vertical;
-            min-height: 300px;
+            min-height: 250px;
+        }
+        .keyword-area {
+            resize: vertical;
+            min-height: 80px;
         }
     </style>
 </head>
 <body class="p-4 md:p-12">
-    <div class="max-w-5xl mx-auto bg-white rounded-2xl container-shadow overflow-hidden">
+    <div class="max-w-6xl mx-auto bg-white rounded-2xl container-shadow overflow-hidden">
         <!-- Header -->
         <div class="p-8 bg-slate-800 text-white">
-            <h1 class="text-3xl font-bold">HTML Kulcsszó Ellenőrző</h1>
-            <p class="text-slate-400 mt-2 text-lg">Ellenőrizd a kulcsszavak sűrűségét a szövegben és az <code class="text-blue-300">alt="..."</code> leírásokban is.</p>
+            <h1 class="text-3xl font-bold">HTML Kulcsszó Ellenőrző (Tömeges)</h1>
+            <p class="text-slate-400 mt-2 text-lg">Add meg a kulcsszavakat vesszővel elválasztva a tömeges elemzéshez.</p>
         </div>
 
         <div class="p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -34,55 +38,66 @@
             <div class="lg:col-span-2 space-y-6">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">HTML Forráskód</label>
-                    <textarea id="htmlInput" class="w-full input-field border border-gray-300 rounded-xl p-4 code-area focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" placeholder="Ide illeszd be a <html...> kódot..." oninput="analyzeContent()"></textarea>
+                    <textarea id="htmlInput" class="w-full border border-gray-300 rounded-xl p-4 code-area focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" placeholder="Ide illeszd be a <html...> kódot..." oninput="analyzeContent()"></textarea>
                 </div>
                 
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="flex-grow">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Keresett kulcsszó</label>
-                        <input type="text" id="keywordInput" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Pl: porszívó" oninput="analyzeContent()">
-                    </div>
-                    <div class="md:w-1/3">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Opciók</label>
-                        <div class="space-y-2 mt-1">
-                            <label class="flex items-center space-x-2 cursor-pointer">
-                                <input type="checkbox" id="caseSensitive" class="w-4 h-4 text-blue-600 rounded" onchange="analyzeContent()">
-                                <span class="text-sm text-gray-600 font-medium">Kis/nagybetű számít</span>
-                            </label>
-                            <label class="flex items-center space-x-2 cursor-pointer">
-                                <input type="checkbox" id="wholeWord" class="w-4 h-4 text-blue-600 rounded" checked onchange="analyzeContent()">
-                                <span class="text-sm text-gray-600 font-medium">Csak teljes szó (pontos)</span>
-                            </label>
-                        </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Kulcsszavak (vesszővel elválasztva)</label>
+                    <textarea id="keywordInput" class="w-full border border-gray-300 rounded-lg p-3 keyword-area focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Pl: porszívó, takarítás, otthon" oninput="analyzeContent()"></textarea>
+                </div>
+
+                <div class="flex flex-wrap gap-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" id="caseSensitive" class="w-4 h-4 text-blue-600 rounded" onchange="analyzeContent()">
+                            <span class="text-sm text-gray-600 font-medium">Kis/nagybetű számít</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" id="wholeWord" class="w-4 h-4 text-blue-600 rounded" checked onchange="analyzeContent()">
+                            <span class="text-sm text-gray-600 font-medium">Csak teljes szó</span>
+                        </label>
                     </div>
                 </div>
             </div>
 
             <!-- Jobb oldal: Eredmények -->
-            <div class="bg-slate-50 rounded-xl p-6 border border-slate-200 h-fit">
-                <h2 class="text-xl font-bold text-slate-800 mb-6 border-b pb-2">Elemzés</h2>
-                
-                <div class="space-y-6">
-                    <div class="bg-white p-4 rounded-lg shadow-sm">
-                        <p class="text-sm text-gray-500 uppercase tracking-wider font-bold">Előfordulás</p>
-                        <p id="occurrenceCount" class="text-4xl font-black text-blue-600">0</p>
-                    </div>
-
-                    <div class="bg-white p-4 rounded-lg shadow-sm">
+            <div class="space-y-6">
+                <div class="bg-slate-50 rounded-xl p-6 border border-slate-200 h-fit">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">Összegzés</h2>
+                    
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-4">
                         <p class="text-sm text-gray-500 uppercase tracking-wider font-bold">Teljes szöveghossz</p>
                         <p id="charCount" class="text-xl font-bold text-slate-700">0 karakter</p>
                         <p class="text-[10px] text-gray-400 mt-1 uppercase italic">(Szöveg + Alt leírások)</p>
                     </div>
 
-                    <div id="densityInfo" class="hidden bg-blue-50 p-4 rounded-lg border border-blue-100">
-                        <p class="text-sm text-blue-700 font-medium">Kulcsszó sűrűség:</p>
-                        <p id="densityValue" class="text-2xl font-bold text-blue-800">0%</p>
+                    <div id="resultsList" class="space-y-3 max-h-[400px] overflow-y-auto">
+                        <!-- Itt jelennek meg a kulcsszó specifikus eredmények -->
+                        <p class="text-sm text-gray-400 italic text-center">Nincs megjelenítendő adat</p>
                     </div>
-                </div>
 
-                <button onclick="clearAll()" class="w-full mt-8 py-3 px-4 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition">
-                    Mindent töröl
-                </button>
+                    <button onclick="clearAll()" class="w-full mt-8 py-3 px-4 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition">
+                        Mindent töröl
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Táblázatos nézet alul (opcionális, ha sok a kulcsszó) -->
+        <div id="tableContainer" class="hidden p-8 border-t border-slate-100">
+            <h3 class="text-lg font-bold mb-4">Részletes eredménytábla</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50">
+                            <th class="p-3 border-b font-semibold text-slate-700">Kulcsszó</th>
+                            <th class="p-3 border-b font-semibold text-slate-700 text-center">Darabszám</th>
+                            <th class="p-3 border-b font-semibold text-slate-700 text-right">Sűrűség</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultTableBody">
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -90,12 +105,12 @@
     <script>
         function analyzeContent() {
             const html = document.getElementById('htmlInput').value;
-            const keyword = document.getElementById('keywordInput').value.trim();
+            const keywordsRaw = document.getElementById('keywordInput').value;
             const caseSensitive = document.getElementById('caseSensitive').checked;
             const wholeWord = document.getElementById('wholeWord').checked;
             
             if (!html) {
-                updateUI(0, 0, 0);
+                updateUI([], 0);
                 return;
             }
 
@@ -107,7 +122,7 @@
             const scripts = tempDiv.querySelectorAll('script, style');
             scripts.forEach(s => s.remove());
 
-            // --- ÚJ RÉSZ: ALT attribútumok kinyerése ---
+            // ALT attribútumok kinyerése
             let altTexts = [];
             const elementsWithAlt = tempDiv.querySelectorAll('[alt]');
             elementsWithAlt.forEach(el => {
@@ -115,51 +130,88 @@
                 if (altValue) altTexts.push(altValue);
             });
 
-            // Tiszta szöveg + Alt szövegek összefűzése egy szóközzel
+            // Tiszta szöveg + Alt szövegek összefűzése
             const visibleText = tempDiv.textContent || tempDiv.innerText || "";
             const cleanText = (visibleText + " " + altTexts.join(" ")).trim();
             const charCount = cleanText.length;
+            const words = cleanText.split(/\s+/).filter(w => w.length > 0);
 
-            if (!keyword) {
-                updateUI(0, charCount, 0);
+            // 2. Kulcsszavak feldolgozása
+            const keywords = keywordsRaw.split(',')
+                                .map(k => k.trim())
+                                .filter(k => k.length > 0);
+
+            if (keywords.length === 0) {
+                updateUI([], charCount);
                 return;
             }
 
-            // 2. Keresés felépítése
-            let count = 0;
-            const flags = caseSensitive ? 'g' : 'gi';
-            const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            
-            let regex;
-            if (wholeWord) {
-                const boundaryPrefix = '(?<![A-ZÁÉÍÓÖŐÚÜŰa-záéíóöőúüű0-9])';
-                const boundarySuffix = '(?![A-ZÁÉÍÓÖŐÚÜŰa-záéíóöőúüű0-9])';
-                regex = new RegExp(boundaryPrefix + escapedKeyword + boundarySuffix, flags);
-            } else {
-                regex = new RegExp(escapedKeyword, flags);
-            }
+            const results = keywords.map(kw => {
+                const flags = caseSensitive ? 'g' : 'gi';
+                const escapedKeyword = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                
+                let regex;
+                if (wholeWord) {
+                    const boundaryPrefix = '(?<![A-ZÁÉÍÓÖŐÚÜŰa-záéíóöőúüű0-9])';
+                    const boundarySuffix = '(?![A-ZÁÉÍÓÖŐÚÜŰa-záéíóöőúüű0-9])';
+                    regex = new RegExp(boundaryPrefix + escapedKeyword + boundarySuffix, flags);
+                } else {
+                    regex = new RegExp(escapedKeyword, flags);
+                }
 
-            const matches = cleanText.match(regex);
-            count = matches ? matches.length : 0;
+                const matches = cleanText.match(regex);
+                const count = matches ? matches.length : 0;
+                const density = words.length > 0 ? ((count / words.length) * 100).toFixed(2) : 0;
 
-            // 3. Sűrűség számítása
-            const words = cleanText.split(/\s+/).filter(w => w.length > 0);
-            const density = words.length > 0 ? ((count / words.length) * 100).toFixed(2) : 0;
+                return { keyword: kw, count, density };
+            });
 
-            updateUI(count, charCount, density);
+            updateUI(results, charCount);
         }
 
-        function updateUI(count, chars, density) {
-            document.getElementById('occurrenceCount').textContent = count;
+        function updateUI(results, chars) {
             document.getElementById('charCount').textContent = chars + " karakter";
             
-            const densityBox = document.getElementById('densityInfo');
-            if (count > 0) {
-                densityBox.classList.remove('hidden');
-                document.getElementById('densityValue').textContent = density + "%";
-            } else {
-                densityBox.classList.add('hidden');
+            const resultsList = document.getElementById('resultsList');
+            const tableContainer = document.getElementById('tableContainer');
+            const tableBody = document.getElementById('resultTableBody');
+            
+            resultsList.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            if (results.length === 0) {
+                resultsList.innerHTML = '<p class="text-sm text-gray-400 italic text-center">Nincs megadott kulcsszó</p>';
+                tableContainer.classList.add('hidden');
+                return;
             }
+
+            tableContainer.classList.remove('hidden');
+
+            results.forEach(res => {
+                // Kártya nézet (Jobb oldalra)
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-lg border flex justify-between items-center ${res.count > 0 ? 'bg-blue-50 border-blue-100' : 'bg-gray-50 border-gray-100'}`;
+                card.innerHTML = `
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-bold text-slate-700 truncate">${res.keyword}</p>
+                        <p class="text-xs text-slate-500">${res.density}% sűrűség</p>
+                    </div>
+                    <div class="text-right ml-2">
+                        <span class="text-xl font-black ${res.count > 0 ? 'text-blue-600' : 'text-slate-300'}">${res.count}</span>
+                    </div>
+                `;
+                resultsList.appendChild(card);
+
+                // Táblázat sor
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition-colors";
+                row.innerHTML = `
+                    <td class="p-3 border-b text-sm font-medium text-slate-800">${res.keyword}</td>
+                    <td class="p-3 border-b text-center font-bold text-blue-600">${res.count}</td>
+                    <td class="p-3 border-b text-right text-sm text-slate-600">${res.density}%</td>
+                `;
+                tableBody.appendChild(row);
+            });
         }
 
         function clearAll() {
